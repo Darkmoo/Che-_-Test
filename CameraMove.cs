@@ -8,7 +8,6 @@ public class CameraMove : MonoBehaviour {
     private Vector3 _cameraOffset;
 
     [Range(0.01f, 1.0f)]
-    public float SmoothFactor = 0.5f;
     public float RotationsSpeed = 5.0f;
 
 	void Start () {
@@ -27,7 +26,7 @@ public class CameraMove : MonoBehaviour {
 
         Vector3 newPos = PlayerTransform.position + _cameraOffset;
 
-        transform.position = Vector3.Slerp(transform.position, newPos, SmoothFactor);
+        transform.position = Vector3.Slerp(transform.position, newPos, 1);
 
 		if (IsMouseButtonPressed())
             transform.LookAt(PlayerTransform);

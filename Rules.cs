@@ -9,6 +9,7 @@ public class Rules : MonoBehaviour
 	DragAndDrop dad;
 	Chess chess;
 	public float scale_multipleer = 6.0f;
+	public GameObject marker;
 	public Rules()
 	{
 		dad = new DragAndDrop();
@@ -69,8 +70,6 @@ public class Rules : MonoBehaviour
 
 		for (; nr < 32; nr++)
 			PlaceFigure("box" + nr, "q", 9, 9);
-		MarkSquare (0, 0, true);
-		MarkSquare (0, 2, true);
 	}
 
 	void PlaceFigure (string box, string figure, int x, int y)
@@ -95,10 +94,24 @@ public class Rules : MonoBehaviour
 		GameObject goSquare = GameObject.Find("" + y + x);
 		GameObject mark;
 		if (isMarked)
-			mark = GameObject.Find ("magic_ring");
+			mark = Instantiate(marker) as GameObject;
 		else
 			mark = GameObject.Find ("empty_mark");
-		mark.transform.position = goSquare.transform.position;
+		mark.transform.parent = goSquare.transform;
+
+	}
+
+	void GetCoord(string name, out int x, out int y) //d2, a4 -> 02 , 41
+	{
+		x = 9;
+		y = 9;
+		if (name.Length == 2 &&
+		    name [0] >= 'a' && name [0] <= 'h' &&
+		    name [1] >= '1' && name [1] <= '8') 
+		{
+			x = name[0] - 'a'; // a-a =0 b-a =1
+			y = name[1] - '1';
+		}
 	}
 }
 
@@ -155,7 +168,6 @@ class DragAndDrop
 		if (clickedItem == null) return;
 		pickPosition = clickedItem.position;
 		item = clickedItem.gameObject;
-
 		//Debug.Log("picked up "+ item.name);
 		state = State.drag;
 	}
