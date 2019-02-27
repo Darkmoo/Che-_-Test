@@ -70,6 +70,7 @@ public class Rules : MonoBehaviour
 		for (; nr < 32; nr++)
 			PlaceFigure("box" + nr, "q", 9, 9);
 		MarkSquare (0, 0, true);
+		MarkSquare (0, 2, true);
 	}
 
 	void PlaceFigure (string box, string figure, int x, int y)
