@@ -43,14 +43,14 @@ public class Pawn : Chessman
 		} 
 		else
 		{
-			//вверх на левно
+			//вверх налевно
 			if (CurrentX != 0 && CurrentY != 0) {
 				c = BoardControl.Instance.Chessmans [CurrentX - 1, CurrentY - 1];
 				if (c != null && c.isWhite)
 					r [CurrentX - 1, CurrentY + 1] = true;
 			}
 
-			//вверх на право
+			//вверх направо
 			if (CurrentX != 0 && CurrentY != 0) {
 				c = BoardControl.Instance.Chessmans [CurrentX - 1, CurrentY - 1];
 				if (c != null && c.isWhite)

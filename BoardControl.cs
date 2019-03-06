@@ -93,6 +93,18 @@ public class BoardControl : MonoBehaviour
 		//bool canMove = CheckMove();
 		if (allowedMoves[x,y]) 
 		{
+			Chessman c = Chessmans[x,y];
+			if (c != null && c.isWhite != isWhiteTurn) 
+			{
+				if (c.GetType() == typeof(King)) 
+				{
+					return;
+				}
+
+				activeChessman.Remove(c.gameObject);
+				Destroy(c.gameObject);
+			}
+
 			Chessmans [selectedChessman.CurrentX, selectedChessman.CurrentY] = null;
 			Vector3 pos = getTileCenter (x, y);
 			//поднял фигуры по выше из-за кривызны)

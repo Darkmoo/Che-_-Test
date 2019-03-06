@@ -4,5 +4,89 @@ using UnityEngine;
 
 public class Rook : Chessman 
 {
+	public override bool[,] PossibleMove ()
+	{
+		bool[,] r = new bool[8,8];
 
+		Chessman c;
+		int i;
+
+		//направо
+		i = CurrentX;
+		while (true) 
+		{
+			i++;
+			if (i >= 8)
+				break;
+			c = BoardControl.Instance.Chessmans [i, CurrentY];
+			if (c == null)
+				r [i, CurrentY] = true;
+			else 
+			{
+				if (c.isWhite != isWhite)
+					r [i, CurrentY] = true;
+
+				break;
+			}
+		}
+
+		//налево
+		i = CurrentX;
+		while (true) 
+		{
+			i--;
+			if (i < 0)
+				break;
+			c = BoardControl.Instance.Chessmans [i, CurrentY];
+			if (c == null)
+				r [i, CurrentY] = true;
+			else 
+			{
+				if (c.isWhite != isWhite)
+					r [i, CurrentY] = true;
+
+				break;
+			}
+		}
+
+		//наверх
+		i = CurrentY;
+		while (true) 
+		{
+			i++;
+			if (i >= 8)
+				break;
+			c = BoardControl.Instance.Chessmans [CurrentX, i];
+			if (c == null)
+				r [CurrentX, i] = true;
+			else 
+			{
+				if (c.isWhite != isWhite)
+					r [CurrentX, i] = true;
+
+				break;
+			}
+		}
+
+		//вниз
+		i = CurrentY;
+		while (true) 
+		{
+			i--;
+			if (i < 0)
+				break;
+			c = BoardControl.Instance.Chessmans [CurrentX, i];
+			if (c == null)
+				r [CurrentX, i] = true;
+			else 
+			{
+				if (c.isWhite != isWhite)
+					r [CurrentX, i] = true;
+
+				break;
+			}
+		}
+
+		return r;
+	}
 }
