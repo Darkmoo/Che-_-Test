@@ -189,12 +189,12 @@ public class BoardControl : MonoBehaviour
 		//Rooks
 		SpawnCheesman(2, 0, 0);
 		SpawnCheesman(2, 7, 0);
-		//Queen
+		//Bishops
 		SpawnCheesman(3, 2, 0);
-		SpawnCheesman(3, 6, 0);
+		SpawnCheesman(3, 5, 0);
 		//Knights
 		SpawnCheesman(4, 1, 0);
-		SpawnCheesman(4, 5, 0);
+		SpawnCheesman(4, 6, 0);
 		//Pawns
 		for (int i = 0; i < 8; i++)
 			SpawnCheesman (5, i, 1);
@@ -207,12 +207,12 @@ public class BoardControl : MonoBehaviour
 		//Rooks
 		SpawnCheesman(8, 0, 7);
 		SpawnCheesman(8, 7, 7);
-		//Queen
+		//Bishops
 		SpawnCheesman(9, 2, 7);
-		SpawnCheesman(9, 6, 7);
+		SpawnCheesman(9, 5, 7);
 		//Knights
 		SpawnCheesman(10, 1, 7);
-		SpawnCheesman(10, 5, 7);
+		SpawnCheesman(10, 6, 7);
 		//Pawns
 		for (int i = 0; i < 8; i++)
 			SpawnCheesman (11, i, 6);		
