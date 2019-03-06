@@ -10,6 +10,9 @@ public class Rules : MonoBehaviour
 	Chess chess;
 	public float scale_multipleer = 6.0f;
 	public GameObject marker;
+	public LayerMask figure_layer;
+	public LayerMask square_layer;
+
 	public Rules()
 	{
 		dad = new DragAndDrop();
@@ -37,7 +40,7 @@ public class Rules : MonoBehaviour
 			//Debug.Log("from "+from + " to "+to);
 
 			string move = figure + from + to;
-			Debug.Log("MOVE   ->> " + move);
+			//Debug.Log("MOVE   ->> " + move);
 			chess = chess.Move(move);
 			ShowFigures ();
 		}
@@ -89,7 +92,7 @@ public class Rules : MonoBehaviour
 
 	}
 
-	void MarkSquare(int x, int y, bool isMarked)
+	public void MarkSquare(int x, int y, bool isMarked)
 	{
 		GameObject goSquare = GameObject.Find("" + y + x);
 		GameObject mark;
@@ -117,7 +120,7 @@ public class Rules : MonoBehaviour
 
 
 class DragAndDrop
-{
+{	
 	enum State 
 	{
 		none,
@@ -184,6 +187,8 @@ class DragAndDrop
 		if (Physics.Raycast (ray, out hit, Mathf.Infinity)) 
 		{
 			//Debug.Log (hit.transform);
+			Vector3 tran = hit.transform.position;
+			//Rules.MarkSquare(Convert.ToInt32(tran.x), Convert.ToInt32(tran.y), true);
 			return hit.transform;
 		}
 		return null;
