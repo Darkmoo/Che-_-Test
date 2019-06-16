@@ -25,6 +25,8 @@ public class BoardControl : MonoBehaviour
 	public List<GameObject> squarePerfabs;
 	private List<GameObject> activeChessman;
 
+	public int[] EnPassanMove{ set; get;}
+
 	public bool isWhiteTurn = true;
 
 	private void Start()
@@ -32,22 +34,6 @@ public class BoardControl : MonoBehaviour
 		Instance = this;
 		SpawnBoard ();
 		SpawnAllChessmans ();
-
-		Debug.Log (Chessmans[0,0]);
-		Debug.Log (Chessmans[7,7]);
-
-		/*SpawnSquare (true, 0, 0);
-
-		SpawnSquare (false, 0, 1);
-		SpawnSquare (true, 0, 2);
-
-		SpawnSquare (false, 1, 0);
-		SpawnSquare (true, 2, 0);*/
-
-		/*activeChessman = new List<GameObject> ();
-
-		SpawnCheesman (0, 0, 0);
-		SpawnCheesman (6, 0, 1);*/
 	}
 
 	private void Update()
@@ -87,12 +73,15 @@ public class BoardControl : MonoBehaviour
 			for (int j = 0; j < 8; j++)
 				if (allowedMoves [i, j])
 					hasAnotherMove = true;
+		if (!hasAnotherMove)
+			return;
 
 		selectedChessman = Chessmans [x, y];
 		//Debug.Log("Selected figure "+selectedChessman.name);
 		BoardHighlights.Instance.HighlightAllowedMoves (allowedMoves);
-		//MarkSquare (x, y);
-	}
+		BuffsControl.Instance.ActivateBuff (allowedMoves);
+        //MarkSquare (x, y);
+    }
 
 	private void MoveChessman(int x, int y)
 	{
@@ -100,8 +89,10 @@ public class BoardControl : MonoBehaviour
 		if (allowedMoves[x,y]) 
 		{
 			Chessman c = Chessmans[x,y];
+
 			if (c != null && c.isWhite != isWhiteTurn) 
 			{
+                //selectedChessman.Attack();
 				if (c.GetType() == typeof(King)) 
 				{
 					EndGame();
@@ -109,27 +100,69 @@ public class BoardControl : MonoBehaviour
 				}
 
 				activeChessman.Remove(c.gameObject);
+				//Destroy(c.gameObject);
+			}
+
+            #region взятие в проходе
+            if (x == EnPassanMove [0] && y == EnPassanMove [1]) 
+			{
+				if (isWhiteTurn)
+					c = Chessmans[x,y-1];	
+				else
+					c = Chessmans[x,y+1];
+				activeChessman.Remove(c.gameObject);
 				Destroy(c.gameObject);
 			}
 
-			Chessmans [selectedChessman.CurrentX, selectedChessman.CurrentY] = null;
-			Vector3 pos = getTileCenter (x, y);
-			//поднял фигуры по выше из-за кривызны)
-			pos.y = 1.2f;
-			selectedChessman.transform.position = pos;
-			selectedChessman.SetPosition (x, y);
+			EnPassanMove [0] = -1;
+			EnPassanMove [1] = -1;
+			if (selectedChessman.GetType () == typeof(Pawn)) 
+			{
+				if (y == 7) 
+				{
+					activeChessman.Remove(selectedChessman.gameObject);
+					Destroy(selectedChessman.gameObject);
+					SpawnChessman (1, x, y);
+					selectedChessman = Chessmans [x, y];
+				}	
+				else if (y == 0) 
+				{
+					activeChessman.Remove(selectedChessman.gameObject);
+					Destroy(selectedChessman.gameObject);
+					SpawnChessman (7, x, y);
+					selectedChessman = Chessmans [x, y];
+				}
+
+				if (selectedChessman.CurrentY == 1 && y == 3) {
+					EnPassanMove [0] = x;
+					EnPassanMove [1] = y - 1;
+				}
+				else if(selectedChessman.CurrentY == 6 && y == 4)
+				{
+					EnPassanMove [0] = x;
+					EnPassanMove [1] = y + 1;
+				}
+			}
+            #endregion
+
+            Chessmans[selectedChessman.CurrentX, selectedChessman.CurrentY] = null;
+
+			selectedChessman.SetPosition (x, y, c);
+            //отмечаем новую позицию фигуры
 			Chessmans [x, y] = selectedChessman;
+
 			isWhiteTurn = !isWhiteTurn;
 		}
 
 		BoardHighlights.Instance.HideHighlights();
+		BuffsControl.Instance.HideBuffs();
 
-		selectedChessman = null;
+        selectedChessman = null;
 	}
 
 	private void MarkSquare(int x, int y)
 	{
-		Vector3 pos = getTileCenter (x, y);
+		Vector3 pos = GetTileCenter (x, y);
 		Quaternion quot = Quaternion.Euler (-90,0,0);
 		GameObject go = Instantiate (marker, pos, quot) as GameObject;
 		go.transform.SetParent(transform);		
@@ -151,7 +184,7 @@ public class BoardControl : MonoBehaviour
 		}
 
 
-		//Рисуем выбранну клетку
+		//Рисуем крест на выбранной клетке
 		if (selectionX >= 0 && selectionY >= 0) 
 		{
 
@@ -164,16 +197,16 @@ public class BoardControl : MonoBehaviour
 				Vector3.forward * (selectionY + 1 * multi) + Vector3.right * selectionX,
 				Vector3.forward * selectionY + Vector3.right * (selectionX + 1 * multi)
 			);
-		}
+		}        
 	}
 
-	private void SpawnCheesman(int index, int x, int y)
+	private void SpawnChessman(int index, int x, int y)
 	{
 		if (index < 6)
 			orientation = Quaternion.Euler(0,0,0);
 		else
 			orientation = Quaternion.Euler (0,180,0);
-		Vector3 pos = getTileCenter (x, y);
+		Vector3 pos = GetTileCenter (x, y);
 		pos.y = 1.2f;
 		GameObject go = Instantiate (chessmanPerfabs [index], pos, orientation) as GameObject;
 		go.transform.SetParent(transform);
@@ -187,47 +220,48 @@ public class BoardControl : MonoBehaviour
 	{
 		activeChessman = new List<GameObject> ();
 		Chessmans = new Chessman[8,8];
+		EnPassanMove = new int[2]{ -1, -1 };
 
 		//Spawn the white team
 		//King
-		SpawnCheesman(0, 4, 0);
+		SpawnChessman(0, 4, 0);
 		//Queen
-		SpawnCheesman(1, 3, 0);
+		SpawnChessman(1, 3, 0);
 		//Rooks
-		SpawnCheesman(2, 0, 0);
-		SpawnCheesman(2, 7, 0);
+		SpawnChessman(2, 0, 0);
+		SpawnChessman(2, 7, 0);
 		//Bishops
-		SpawnCheesman(3, 2, 0);
-		SpawnCheesman(3, 5, 0);
+		SpawnChessman(3, 2, 0);
+		SpawnChessman(3, 5, 0);
 		//Knights
-		SpawnCheesman(4, 1, 0);
-		SpawnCheesman(4, 6, 0);
+		SpawnChessman(4, 1, 0);
+		SpawnChessman(4, 6, 0);
 		//Pawns
 		for (int i = 0; i < 8; i++)
-			SpawnCheesman (5, i, 1);
+			SpawnChessman (5, i, 1);
 
 		//Spawn the black team
 		//King
-		SpawnCheesman(6, 4, 7);
+		SpawnChessman(6, 4, 7);
 		//Queen
-		SpawnCheesman(7, 3, 7);
+		SpawnChessman(7, 3, 7);
 		//Rooks
-		SpawnCheesman(8, 0, 7);
-		SpawnCheesman(8, 7, 7);
+		SpawnChessman(8, 0, 7);
+		SpawnChessman(8, 7, 7);
 		//Bishops
-		SpawnCheesman(9, 2, 7);
-		SpawnCheesman(9, 5, 7);
+		SpawnChessman(9, 2, 7);
+		SpawnChessman(9, 5, 7);
 		//Knights
-		SpawnCheesman(10, 1, 7);
-		SpawnCheesman(10, 6, 7);
+		SpawnChessman(10, 1, 7);
+		SpawnChessman(10, 6, 7);
 		//Pawns
 		for (int i = 0; i < 8; i++)
-			SpawnCheesman (11, i, 6);		
+			SpawnChessman (11, i, 6);		
 	}
 
 	private void SpawnSquare(bool is_white, int x, int y)
 	{
-		Vector3 pos = getTileCenter (x, y);
+		Vector3 pos = GetTileCenter (x, y);
 		GameObject go = Instantiate (squarePerfabs [is_white ? 1: 0], pos, orientation) as GameObject;
 		go.transform.SetParent(transform);
 	}
@@ -248,7 +282,7 @@ public class BoardControl : MonoBehaviour
 		}
 	}
 
-	private Vector3 getTileCenter(int x, int y)
+	public Vector3 GetTileCenter(int x, int y)
 	{
 		Vector3 origin = Vector3.zero;
 		origin.x += (tile_size * x * multi) + tile_offset + multi/2;
@@ -256,7 +290,7 @@ public class BoardControl : MonoBehaviour
 		return origin;
 	}
 		
-	private void EndGame()
+	public void EndGame()
 	{
 		if (isWhiteTurn) 
 			Debug.Log ("Победила команда белых!");

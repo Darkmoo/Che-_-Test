@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class BoardHighlights : MonoBehaviour 
 {
-	public static BoardHighlights Instance{set;get;}
+    public static BoardHighlights Instance;
 
-	public GameObject highlightePrefab;
-	private List<GameObject> highlights;
+	public GameObject greenHighlighte;
+	public GameObject redHighlighte;
+
+    private List<GameObject> highlights;
 
 	private void Start()
 	{
@@ -21,7 +23,7 @@ public class BoardHighlights : MonoBehaviour
 
 		if (go == null)
 		{
-			go = Instantiate (highlightePrefab);
+			go = Instantiate (greenHighlighte);
 			highlights.Add (go);
 		}
 
@@ -36,8 +38,6 @@ public class BoardHighlights : MonoBehaviour
 			{
 				if (moves [i, j]) 
 				{
-					Debug.Log("i "+i + " j "+j );
-
 					GameObject go = GetHighlightObject ();
 					go.SetActive (true);
 					go.transform.position = new Vector3 (5 + i * 10, 1, 5 + j * 10);
